@@ -294,6 +294,7 @@ README.md
 Если решение неоднозначно — выбери production best practice и объясни почему.<!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
+at specs/002-fix-graceful-shutdown/plan.md
 <!-- SPECKIT END -->
 Ты senior Python engineer и architect.
 Нужно реализовать production-ready Telegram bot на Python 3.12+.

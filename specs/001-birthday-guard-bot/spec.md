@@ -72,10 +72,11 @@ A Telegram group administrator can run `/add_all` to immediately restore all emp
 
 - **FR-001**: The system MUST read employee records daily from a configured Google Sheets document (columns: `tg_username`, `full_name`, `birth_date`, `wishes`, `comment`).
 - **FR-002**: The system MUST remove an employee from the Telegram group exactly `REMOVE_BEFORE_DAYS` calendar days before their next birthday.
-- **FR-003**: The system MUST send a group notification when an employee is removed, including full name, username, and any non-empty wishes/comment fields.
-- **FR-004**: The system MUST restore an employee to the Telegram group `RETURN_AFTER_DAYS` calendar days after their birthday.
-- **FR-005**: The system MUST prevent duplicate removals and restorations for the same employee in the same birth year.
-- **FR-006**: The system MUST expose a `/add_all` command that immediately restores all bot-removed employees, accessible only to group administrators.
+- **FR-003**: The system MUST send a group notification when employees are removed, including each employee's full name, username, and any non-empty wishes/comment fields. If multiple employees share the same upcoming birthday date, they MUST be combined into a single notification message rather than sending one message per employee.
+- **FR-004**: The system MUST restore an employee to the Telegram group `RETURN_AFTER_DAYS` calendar days after their birthday. Restoration MUST be silent — no group notification is sent.
+- **FR-005**: The system MUST prevent duplicate removals and restorations for the same employee in the same birth year, except when re-removal is required (see FR-005a).
+- **FR-005a**: If an employee marked `status = removed` is detected back in the group (manually re-added by an admin) before their birthday has passed, the system MUST re-remove them on the next daily run and log the re-removal.
+- **FR-006**: The system MUST expose a `/add_all` command that immediately restores all bot-removed employees, accessible only to group administrators. Restoration via `/add_all` MUST be silent — no group notification is sent. The bot MUST reply to the admin with a confirmation of how many employees were restored (or that none were pending).
 - **FR-007**: The system MUST verify it has the required admin privileges before attempting any removal or restoration action.
 - **FR-008**: The system MUST handle gracefully: user not found, user never joined, bot has no rights, flood control, and invalid usernames — logging each error and continuing with remaining employees.
 - **FR-009**: The system MUST skip and log Google Sheets rows that fail validation (malformed date, missing required fields) without stopping the daily job.
@@ -100,6 +101,16 @@ A Telegram group administrator can run `/add_all` to immediately restore all emp
 - **SC-005**: Invalid or malformed sheet rows cause no interruption — the job completes for all valid rows and logs a warning for each skipped row.
 - **SC-006**: The `/add_all` command completes restoration of all removed employees within 60 seconds of invocation.
 
+## Clarifications
+
+### Session 2026-05-18
+
+- Q: If a Telegram admin manually re-adds an employee during the REMOVE_BEFORE_DAYS window, what should the bot do on the next daily run? → A: Re-remove the employee if detected back in the group before their birthday passes (FR-005a).
+- Q: Should the bot send a group message when restoring an employee after their birthday? → A: No — restoration is silent, no group notification sent (FR-004).
+- Q: When multiple employees share the same upcoming birthday date, should the group notification be combined or separate? → A: Single combined message listing all employees for that date (FR-003).
+- Q: When /add_all restores employees, should the group receive a notification? → A: No — silent restoration, consistent with automatic restoration; bot replies privately to the admin with a count (FR-006).
+- Q: What is the approximate number of employees tracked in the sheet? → A: Under 100 employees (used to bound performance expectations and caching strategy).
+
 ## Assumptions
 
 - The Google Sheets document is shared with a Service Account that has read access.
@@ -108,4 +119,5 @@ A Telegram group administrator can run `/add_all` to immediately restore all emp
 - The group is a Telegram supergroup (regular groups do not support `banChatMember`/`unbanChatMember` in the same way).
 - The birth date format in Google Sheets is strictly `dd.mm.yyyy`; other formats are treated as invalid.
 - The system is deployed on a single instance (no distributed concurrency concerns for the scheduler).
+- The Google Sheet contains fewer than 100 employee records; performance targets and caching are sized accordingly.
 - Network connectivity to Telegram and Google APIs is generally reliable; transient failures are handled by retry logic.
