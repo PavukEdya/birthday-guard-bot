@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# uv
+.uv/
+
+# Environment / secrets
+.env
+*.env
+!.env.example
+credentials*.json
+service_account*.json
+
+# Data / SQLite
+data/
+*.db
+*.sqlite3
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# MyPy
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# AI
+.specify/cache/
+.specify/tmp/
+.specify/logs/
+.specify/.sessions/
+
+.claude/cache/
+.claude/history/
+.claude/logs/
+.claude/tmp/
+
